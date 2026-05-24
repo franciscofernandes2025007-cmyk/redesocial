@@ -68,9 +68,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'redesocial.wsgi.application'
 
 
-# Database - Alterado de SQLite para MySQL usando as variáveis do .env
+# Database - Sincronizado diretamente com os parâmetros do Docker Compose
 DATABASES = {
-    'default': env.db(),
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'redesocial',
+        'USER': 'root',
+        'PASSWORD': 'rootpassword',
+        'HOST': 'db',
+        'PORT': '3306',
+    }
 }
 
 
@@ -92,7 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-LANGUAGE_CODE = 'pt-pt' # Alterado para português se preferires
+LANGUAGE_CODE = 'pt-pt'
 
 TIME_ZONE = 'UTC'
 
@@ -105,3 +112,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import os
+
+# Configuração para ficheiros de média (Uploads dos utilizadores)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
