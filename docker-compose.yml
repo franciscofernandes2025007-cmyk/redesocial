@@ -4,27 +4,33 @@ services:
     container_name: redesocial_db_container
     restart: always
     environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: redesocial
+      MYSQL_ROOT_PASSWORD: rootpassword
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - redesocial_net
 
   web:
     build: .
     container_name: redesocial_web_container
-    restart: always
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      - DEBUG=1
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    networks:
+      - redesocial_net
 
 volumes:
   mysql_data:
+
+networks:
+  redesocial_net:
+    driver: bridge
