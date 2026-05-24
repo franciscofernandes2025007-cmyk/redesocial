@@ -1,0 +1,18 @@
+# Ambiente Virtual
+venv/
+ENV/
+env/
+
+# Python cache
+**/__pycache__/
+*.py[cod]
+
+# Variáveis de Ambiente (Segurança)
+.env
+
+# Configurações do VS Code
+.vscode/
+*.code-workspace
+
+# Docker logs
+*.log
