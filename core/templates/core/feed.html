@@ -2,52 +2,66 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Minha Rede Social</title>
+    <title>Rede Social - Feed</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .box { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        textarea { width: 100%; height: 60px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; box-sizing: border-box; }
-        button { background: #1877f2; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .post-header { display: flex; justify-content: space-between; font-weight: bold; color: #333; margin-bottom: 10px; }
-        .btn-delete { color: red; text-decoration: none; font-size: 12px; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f0f2f5; }
+        .box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 80px; margin-bottom: 10px; resize: none; border: 1px solid #ddd; border-radius: 6px; padding: 10px; box-sizing: border-box; }
+        button { background: #1877f2; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .post { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; }
+        .autor { font-weight: bold; color: #1877f2; text-decoration: none; }
+        .data { font-size: 12px; color: #65676b; margin-bottom: 10px; }
+        .post-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 6px; margin-top: 10px; }
+        .acoes { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .btn-acao { text-decoration: none; color: #65676b; font-weight: bold; margin-right: 20px; font-size: 14px; }
+        .btn-apagar { position: absolute; top: 15px; right: 15px; color: #dc3545; text-decoration: none; font-size: 13px; font-weight: bold; }
+        .input-file { margin-bottom: 10px; display: block; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Feed da Rede Social</h2>
 
-        {% if user.is_authenticated %}
-            <div class="box">
-                <form action="{% url 'criar_post' %}" method="POST">
-                    {% csrf_secret_token %}
-                    {% csrf_token %}
-                    <textarea name="conteudo" placeholder="No que estás a pensar, {{ user.username }}?" required></textarea>
-                    <p style="text-align: right; margin: 10px 0 0 0;">
-                        <button type="submit">Publicar</button>
-                    </p>
-                </form>
-            </div>
-        {% else %}
-            <div class="box">
-                <p><a href="/admin/">Faz login no Painel de Administração</a> para poderes publicar coisas!</p>
-            </div>
-        {% endif %}
+    <h2>Feed da Rede Social</h2>
 
-        {% for post in posts %}
-            <div class="box">
-                <div class="post-header">
-                    <span>@{{ post.autor.username }}</span>
-                    {% if post.autor == user %}
-                        <a href="{% url 'eliminar_post' post.id %}" class="btn-delete">Eliminar</a>
-                    {% endif %}
-                </div>
-                <p>{{ post.conteudo }}</p>
-                <small style="color: gray;">{{ post.criado_em|date:"d/m/Y H:i" }}</small>
+    {% if user.is_authenticated %}
+        <div class="box">
+            <p>Olá, <strong>{{ user.username }}</strong>!</p>
+            <form method="POST" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+                <textarea name="conteudo" placeholder="O que estás a pensar?"></textarea>
+                <input type="file" name="imagem" accept="image/*" class="input-file">
+                <button type="submit">Publicar</button>
+            </form>
+        </div>
+    {% else %}
+        <div class="box"><p><a href="/admin/">Faz login no admin</a> para publicar!</p></div>
+    {% endif %}
+
+    <h3>Todas as Publicações</h3>
+    {% for post in posts %}
+        <div class="post">
+            <a href="{% url 'perfil_utilizador' post.autor.username %}" class="autor">@{{ post.autor.username }}</a>
+            <div class="data">{{ post.data_criacao|date:"d/m/Y H:i" }}</div>
+            
+            {% if post.conteudo %}
+                <p style="white-space: pre-wrap; margin: 0 0 10px 0; padding-right: 60px;">{{ post.conteudo }}</p>
+            {% endif %}
+
+            {% if post.imagem %}
+                <img src="{{ post.imagem.url }}" class="post-img" alt="Imagem do post">
+            {% endif %}
+            
+            {% if post.autor == user %}
+                <a href="{% url 'apagar_post' post.id %}" class="btn-apagar" onclick="return confirm('Apagar post?')">❌ Apagar</a>
+            {% endif %}
+
+            <div class="acoes">
+                <a href="{% url 'dar_like' post.id %}" class="btn-acao">👍 {{ post.likes.count }} Likes</a>
+                <a href="{% url 'detalhe_post' post.id %}" class="btn-acao">💬 {{ post.comentarios.count }} Comentários</a>
             </div>
-        {% empty %}
-            <p style="text-align: center; color: gray;">Ainda não há nenhuma publicação no feed.</p>
-        {% endfor %}
-    </div>
+        </div>
+    {% empty %}
+        <p>Ainda não há publicações.</p>
+    {% endfor %}
+
 </body>
 </html>
